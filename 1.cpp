@@ -1,78 +1,72 @@
-// BASIC Code
 #include <bits/stdc++.h>
 using namespace std;
 
-class DisjointSet {
-    vector<int> parent;
-
-public:
-
-    // Constructor
-    DisjointSet(int n) {
-
-        parent.resize(n);
-
-        for(int i = 0; i < n; i++) {
-            parent[i] = i;
-        }
-    }
-
-    // Basic Find
-    int find(int x) {
-
-        if(parent[x] == x)
-            return x;
-
-        return find(parent[x]);
-    }
-
-    // Basic Union
-    void unionSets(int x, int y) {
-
-        int rootX = find(x);
-        int rootY = find(y);
-
-        if(rootX != rootY) {
-            parent[rootY] = rootX;
-        }
-    }
-};
-
 int main() {
 
-    int n, m;
+    int V, E;
 
-    cout << "Enter number of nodes: ";
-    cin >> n;
+    cin >> V >> E;
 
-    DisjointSet ds(n);
+    vector<pair<int,int>> adj[V];
 
-    cout << "Enter number of union operations: ";
-    cin >> m;
+    // Input graph
+    for(int i = 0; i < E; i++) {
 
-    cout << "Enter pairs (u v):\n";
+        int u, v, w;
 
-    for(int i = 0; i < m; i++) {
+        cin >> u >> v >> w;
 
-        int u, v;
-        cin >> u >> v;
-
-        ds.unionSets(u, v);
+        adj[u].push_back({v, w});
+        adj[v].push_back({u, w});
     }
 
-    int q;
-    cout << "Enter number of find queries: ";
-    cin >> q;
+    // Min Heap
+    priority_queue<
+        pair<int,int>,
+        vector<pair<int,int>>,
+        greater<pair<int,int>>
+    > pq;
 
-    cout << "Enter elements to find parent:\n";
+    vector<bool> visited(V, false);
 
-    for(int i = 0; i < q; i++) {
+    int mstWeight = 0;
 
-        int x;
-        cin >> x;
+    // Start from node 0
+    pq.push({0, 0});
 
-        cout << "Root of " << x << " = " << ds.find(x) << endl;
+    while(!pq.empty()) {
+
+        auto p = pq.top();
+
+        pq.pop();
+
+        int weight = p.first;
+        int node = p.second;
+
+        // Skip if already visited
+        if(visited[node])
+            continue;
+
+        visited[node] = true;
+
+        mstWeight += weight;
+
+        // Visit neighbors
+        for(auto &edge : adj[node]) {
+
+            int neighbor = edge.first;
+
+            int edgeWeight = edge.second;
+
+            if(!visited[neighbor]) {
+
+                pq.push({edgeWeight, neighbor});
+            }
+        }
     }
+
+    cout << "Minimum Spanning Tree Weight = "
+         << mstWeight << endl;
 
     return 0;
 }
